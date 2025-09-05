@@ -21,9 +21,15 @@ conda activate advi2i
 pip install -r requirements.txt
 ```
 
+The nudenet could be installed by:
+
+```
+pip install nudenet
+```
+
 ### Data Preparation
 
-1. Download and extract the `data.tar.gz` file, which contains:
+1. Download and extract the `dataset.tar.gz` file, which contains:
    - Training and testing images
    - Mask images for inpainting models
    - Prompts for constructing NSFW concept and dataset
@@ -143,11 +149,10 @@ python eval_generator_inpaint.py \
 If you use this code in your research, please cite our paper:
 
 ```bibtex
-@inproceedings{advI2I2024,
+@inproceedings{zengadvi2i,
   title={AdvI2I: Adversarial Image Attack on Image-to-Image Diffusion Models},
-  author={Your Name},
-  booktitle={International Conference on Machine Learning (ICML)},
-  year={2024}
+  author={Zeng, Yaopei and Cao, Yuanpu and Cao, Bochuan and Chang, Yurui and Chen, Jinghui and Lin, Lu},
+  booktitle={Forty-second International Conference on Machine Learning}
 }
 ```
 

@@ -1,6 +1,5 @@
 """make variations of input image"""
 import argparse, os
-from utils.text_docs import *
 import numpy as np
 
 
@@ -11,6 +10,7 @@ from itertools import islice
 from fractions import Fraction
 from pytorch_lightning import seed_everything
 from PIL import Image
+from utils.text_docs import *
 from utils.util import *
 from diffusion.diff_process import diff_process
 import pandas as pd
@@ -25,7 +25,7 @@ def get_nudity_embeddings(model, processor, vec_scale=1):
     vec_file = "your_path/steer_vec/clip_steer_vec.pt"
 
     num_samples = 1
-    df = pd.read_csv('scripts/text_docs/ring_vectors/Nudity_prompt.csv')
+    df = pd.read_csv('your_path/adv_diffusion/dataset/prompts/Nudity_prompt.csv')
     nudity_text = []
     for _, row in df.iterrows():
         if row.clothes != 'None':
@@ -42,7 +42,7 @@ def get_nudity_embeddings(model, processor, vec_scale=1):
     nudity_text = np.array(nudity_text)
 
     NoNudity_text = []
-    df = pd.read_csv('scripts/text_docs/ring_vectors/NoNudity_prompt.csv')
+    df = pd.read_csv('your_path/adv_diffusion/dataset/prompts/NoNudity_prompt.csv')
     for _, row in df.iterrows():
         prompt = [f"make the {row.prompt}"] * num_samples
         inputs = processor(text=prompt, return_tensors="pt").to(device)
@@ -62,13 +62,18 @@ def get_nudity_embeddings(model, processor, vec_scale=1):
 
     return text_direction
 
-
 def get_nudity_vec(pipe, device, vec_file, num_images_per_prompt = 5, args=None):
-    be_prompts = original_prompts_bg
-    harm_prompts = original_prompts_bg_naked
+    df = pd.read_csv('your_path/adv_diffusion/dataset/prompts/Nudity_prompt.csv')
     nudity_text = []
-    for be_prompts, harm_prompts in zip(be_prompts, harm_prompts):
-        be_prompts - harm_prompts
+    for _, row in df.iterrows():
+        if row.clothes != 'None':
+            if row.people == 'None':
+                prompt = [f"Make {row.nudity} {row.location}.", f"Let the completely {row.nudity} {row.location}!", f"Put the completely {row.nudity} {row.location}!"]
+            else:
+                prompt = [f"Make {row.people} {row.nudity} {row.location}.", f"Let the {row.people} completely {row.nudity}, {row.location}!", f"Put the {row.people} completely {row.nudity}, {row.location}!"]
+        else:
+            prompt = [f"Make {row.people} {row.nudity} {row.location}.", f"Let the {row.people} completely {row.nudity}, {row.location}!", f"Put the {row.people} completely {row.nudity}, {row.location}!"]
+
         if args.version == "p2p":
             embed = pipe._encode_prompt(prompt[0], device=device, num_images_per_prompt=num_images_per_prompt, do_classifier_free_guidance=True)
         elif "3-0" in args.version:
@@ -84,7 +89,7 @@ def get_nudity_vec(pipe, device, vec_file, num_images_per_prompt = 5, args=None)
     nudity_text = np.array(nudity_text)
 
     NoNudity_text = []
-    df = pd.read_csv('your_path/adv_diffusion/dataset/prompts/ring_vectors/NoNudity_prompt.csv')
+    df = pd.read_csv('your_path/adv_diffusion/dataset/prompts/NoNudity_prompt.csv')
     for _, row in df.iterrows():
         prompt = [f"Make {row.prompt}", f"Let the {row.prompt}", f"Put the {row.prompt}"]
 
@@ -108,11 +113,11 @@ def get_nudity_vec(pipe, device, vec_file, num_images_per_prompt = 5, args=None)
     average_vec_1 = torch.tensor(np.mean(nudity_text - NoNudity_text, axis=0))
 
     torch.save(average_vec_1, vec_file)
-    print("success")
+    print("Success!")
 
 
 def get_violence_vec(pipe, device, vec_file, num_images_per_prompt = 5, args=None):
-    df = pd.read_csv('your_path/adv_diffusion/dataset/prompts/ring_vectors/Violence_30.csv')
+    df = pd.read_csv('your_path/adv_diffusion/dataset/prompts/Violence_30.csv')
 
     violence_text = []
     for _, row in df.iterrows():
@@ -153,7 +158,7 @@ def get_violence_vec(pipe, device, vec_file, num_images_per_prompt = 5, args=Non
     average_vec_1 = torch.tensor(np.mean(violence_text - NoViolence_text, axis=0))
 
     torch.save(average_vec_1, vec_file)
-    print("success")
+    print("Success!")
 
 
 def main():
